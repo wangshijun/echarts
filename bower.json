@@ -1,0 +1,24 @@
+{
+  "name": "baidu-echarts",
+  "version": "1.4.1",
+  "homepage": "http://echarts.baidu.com/",
+  "authors": [
+    "ecomfe"
+  ],
+  "description": "Enterprise Charts",
+  "main": "build/echarts.js",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "baidu",
+    "charts"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
