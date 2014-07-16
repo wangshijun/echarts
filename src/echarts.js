@@ -18,6 +18,7 @@
 define(function (require) {
     var ecConfig = require('./config');
     var zrUtil = require('zrender/tool/util');
+    var zrEvent = require('zrender/tool/event');
     
     var self = {};
     
@@ -74,6 +75,14 @@ define(function (require) {
     };
 
     /**
+     * 消息中心
+     */
+    function MessageCenter() {
+        zrEvent.Dispatcher.call(this);
+    }
+    zrUtil.merge(MessageCenter.prototype, zrEvent.Dispatcher.prototype, true);
+
+    /**
      * 基于zrender实现Echarts接口层
      * @param {HtmlElement} dom 必要
      */
@@ -97,7 +106,10 @@ define(function (require) {
         };
         this._curEventType = false;         // 破循环信号灯
         this._chartList = [];               // 图表实例
-        this._messageCenter = {};           // Echarts层的消息中心，做zrender原始事件转换
+
+        this._messageCenter = new MessageCenter();
+
+        this._messageCenterOutSide = new MessageCenter();    // Echarts层的外部消息中心，做Echarts层的消息转发
         
         // resize方法经常被绑定到window.resize上，闭包一个this
         this.resize = this.resize();
@@ -161,15 +173,36 @@ define(function (require) {
             this._zr = _zr;
 
             // 添加消息中心的事件分发器特性
-            var zrEvent = require('zrender/tool/event');
             zrEvent.Dispatcher.call(this._messageCenter);
+            zrEvent.Dispatcher.call(this._messageCenterOutSide);
+            
+            // wrap: n,e,d,t for name event data this
+            this._messageCenter.dispatch = function(type, event, eventPackage, that) {
+                eventPackage = eventPackage || {};
+                eventPackage.type = type;
+                eventPackage.event = event;
+
+                self._messageCenter.dispatchWithContext(type, eventPackage, that);
+                if (type != 'HOVER') {
+                    setTimeout(function(){
+                        self._messageCenterOutSide.dispatchWithContext(
+                            type, eventPackage, that
+                        );
+                    },50);
+                }
+                else {
+                    self._messageCenterOutSide.dispatchWithContext(
+                        type, eventPackage, that
+                    );
+                }
+            }
             
             this._onevent = function(param){
                 return self.__onevent(param);
             };
             for (var e in ecConfig.EVENT) {
                 if (e != 'CLICK' && e != 'HOVER' && e != 'MAP_ROAM') {
-                    this._messageCenter.bind(ecConfig.EVENT[e], this._onevent);
+                    this._messageCenter.bind(ecConfig.EVENT[e], this._onevent, this);
                 }
             }
 
@@ -1341,22 +1374,22 @@ define(function (require) {
         },
 
         /**
-         * 绑定事件
+         * 外部接口绑定事件
          * @param {Object} eventName 事件名称
          * @param {Object} eventListener 事件响应函数
          */
         on : function (eventName, eventListener) {
-            this._messageCenter.bind(eventName, eventListener);
+            this._messageCenterOutSide.bind(eventName, eventListener, this);
             return this;
         },
 
         /**
-         * 解除事件绑定
+         * 外部接口解除事件绑定
          * @param {Object} eventName 事件名称
          * @param {Object} eventListener 事件响应函数
          */
         un : function (eventName, eventListener) {
-            this._messageCenter.unbind(eventName, eventListener);
+            this._messageCenterOutSide.unbind(eventName, eventListener);
             return this;
         },
         

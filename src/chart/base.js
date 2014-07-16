@@ -23,6 +23,7 @@ define(function (require) {
     function Base(){
         var self = this;
         this.selectedMap = {};
+        this.lastShapeList = [];
         this.shapeHandler = {
             onclick : function () {
                 self.isClick = true;
@@ -1083,6 +1084,7 @@ define(function (require) {
                         newMap[key] = shapeList[i];
                     }
                 }
+                
                 for (key in oldMap) {
                     if (!newMap[key]) {
                         // 新的没有 删除
@@ -1209,7 +1211,7 @@ define(function (require) {
          * @param {Array=} addShapeList 指定特效对象，不知道默认使用this.shapeList
          */
         animationMark : function (duration , easing, addShapeList) {
-            shapeList = addShapeList || this.shapeList;
+            var shapeList = addShapeList || this.shapeList;
             var x;
             var y;
             for (var i = 0, l = shapeList.length; i < l; i++) {
@@ -1227,7 +1229,7 @@ define(function (require) {
          */
         animationEffect : function (addShapeList) {
             !addShapeList && this.clearEffectShape();
-            shapeList = addShapeList || this.shapeList;
+            var shapeList = addShapeList || this.shapeList;
             var zlevel = ecConfig.EFFECT_ZLEVEL;
             if (this.canvasSupported) {
                 this.zr.modLayer(
