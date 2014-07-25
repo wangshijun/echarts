@@ -1,6 +1,6 @@
 {
-  "name": "baidu-echarts",
-  "version": "2.0.0",
+  "name": "echarts",
+  "version": "2.0.2",
   "homepage": "https://github.com/ecomfe/echarts",
   "authors": [
     { "name": "Kener", "email": "linzhifeng@baidu.com" },

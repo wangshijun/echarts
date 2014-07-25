@@ -7,12 +7,12 @@
  */
 define(function (require) {
     var Base = require('./base');
-    
+
     // 图形依赖
     var TextShape = require('zrender/shape/Text');
     var LineShape = require('zrender/shape/Line');
     var RectangleShape = require('zrender/shape/Rectangle');
-    
+
     var ecConfig = require('../config');
     var zrUtil = require('zrender/tool/util');
 
@@ -29,19 +29,19 @@ define(function (require) {
             console.err('option.series.length == 0.');
             return;
         }
-        
+
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
 
         this.series = series;
         this.grid = this.component.grid;
-        
+
         for (var method in axisBase) {
             this[method] = axisBase[method];
         }
-        
+
         this.refresh(option, series);
     }
-    
+
     ValueAxis.prototype = {
         type : ecConfig.COMPONENT_TYPE_AXIS_VALUE,
         _buildShape : function () {
@@ -74,9 +74,9 @@ define(function (require) {
             if (this.isHorizontal()) {
                 // 横向
                 var yPosition = this.option.position == 'bottom'
-                        ? (tickOption.inside 
+                        ? (tickOption.inside
                            ? (this.grid.getYend() - length - 1) : (this.grid.getYend()) + 1)
-                        : (tickOption.inside 
+                        : (tickOption.inside
                            ? (this.grid.getY() + 1) : (this.grid.getY() - length - 1));
                 var x;
                 for (var i = 0; i < dataLength; i++) {
@@ -101,9 +101,9 @@ define(function (require) {
             else {
                 // 纵向
                 var xPosition = this.option.position == 'left'
-                    ? (tickOption.inside 
+                    ? (tickOption.inside
                        ? (this.grid.getX() + 1) : (this.grid.getX() - length - 1))
-                    : (tickOption.inside 
+                    : (tickOption.inside
                        ? (this.grid.getXend() - length - 1) : (this.grid.getXend() + 1));
 
                 var y;
@@ -137,18 +137,32 @@ define(function (require) {
             var margin     = this.option.axisLabel.margin;
             var clickable  = this.option.axisLabel.clickable;
             var textStyle  = this.option.axisLabel.textStyle;
+            var skipFirst  = this.option.axisLabel.skipFirst;
 
             if (this.isHorizontal()) {
                 // 横向
+                var orient;
                 var yPosition;
                 var baseLine;
                 if (this.option.position == 'bottom') {
-                    yPosition = this.grid.getYend() + margin;
-                    baseLine = 'top';
+                    orient = this.option.orient || 'bottom';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getYend() + margin;
+                        baseLine = 'top';
+                    } else {
+                        yPosition = this.grid.getYend() - margin;
+                        baseLine = 'bottom';
+                    }
                 }
                 else {
-                    yPosition = this.grid.getY() - margin;
-                    baseLine = 'bottom';
+                    orient = this.option.orient || 'top';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getY() - margin;
+                        baseLine = 'bottom';
+                    } else {
+                        yPosition = this.grid.getY() + margin;
+                        baseLine = 'top';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i++) {
@@ -160,7 +174,7 @@ define(function (require) {
                             y : yPosition,
                             color : typeof textStyle.color == 'function'
                                     ? textStyle.color(data[i]) : textStyle.color,
-                            text : this._valueLabel[i],
+                            text : (skipFirst && i === 0) ? '' : this._valueLabel[i],
                             textFont : this.getFont(textStyle),
                             textAlign : textStyle.align || 'center',
                             textBaseline : textStyle.baseline || baseLine
@@ -185,15 +199,28 @@ define(function (require) {
             }
             else {
                 // 纵向
+                var orient;
                 var xPosition;
                 var align;
                 if (this.option.position == 'left') {
-                    xPosition = this.grid.getX() - margin;
-                    align = 'right';
+                    orient = this.option.orient || 'left';
+                    if (orient === 'left') {        // label放在grid外面
+                        xPosition = this.grid.getX() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid里面
+                        xPosition = this.grid.getX() + margin;
+                        align = 'left';
+                    }
                 }
                 else {
-                    xPosition = this.grid.getXend() + margin;
-                    align = 'left';
+                    orient = this.option.orient || 'right';
+                    if (orient === 'left') {        // label放在grid里面
+                        xPosition = this.grid.getXend() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid外面
+                        xPosition = this.grid.getXend() + margin;
+                        align = 'left';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i++) {
@@ -205,19 +232,19 @@ define(function (require) {
                             y : this.getCoord(data[i]),
                             color : typeof textStyle.color == 'function'
                                     ? textStyle.color(data[i]) : textStyle.color,
-                            text : this._valueLabel[i],
+                            text : (skipFirst && i === 0) ? '' : this._valueLabel[i],
                             textFont : this.getFont(textStyle),
                             textAlign : textStyle.align || align,
-                            textBaseline : textStyle.baseline 
+                            textBaseline : textStyle.baseline
                                            || (i === 0 && this.option.name !== '')
                                                ? 'bottom'
-                                               : (i == (dataLength - 1) 
+                                               : (i == (dataLength - 1)
                                                   && this.option.name !== '')
                                                  ? 'top'
                                                  : 'middle'
                         }
                     };
-                    
+
                     if (rotate) {
                         axShape.rotation = [
                             rotate * Math.PI / 180,
@@ -415,7 +442,7 @@ define(function (require) {
                         // 不是自己的数据不计算极值
                         continue;
                     }
-                    
+
                     var key = this.series[i].name || 'kener';
                     if (!this.series[i].stack) {
                         data[key] = data[key] || [];
@@ -505,12 +532,12 @@ define(function (require) {
                         }
                     }
                 }
-                
+
                 //console.log(this._min,this._max,'vvvvv111111')
                 this._min = isNaN(this.option.min - 0)
                        ? (this._min - Math.abs(this._min * this.option.boundaryGap[0]))
                        : (this.option.min - 0);    // 指定min忽略boundaryGay[0]
-    
+
                 this._max = isNaN(this.option.max - 0)
                        ? (this._max + Math.abs(this._max * this.option.boundaryGap[1]))
                        : (this.option.max - 0);    // 指定max忽略boundaryGay[1]
@@ -717,18 +744,18 @@ define(function (require) {
                 this._min = (this._min / power).toFixed(precision) - 0;
                 this._max = (this._max / power).toFixed(precision) - 0;
                 for (var i = 0; i <= splitNumber; i++) {
-                    this._valueList[i] = 
+                    this._valueList[i] =
                         (this._valueList[i] / power).toFixed(precision) - 0;
                 }
             }
             this._reformLabelData();
         },
-        
+
         _customerValue : function () {
             var splitNumber = this.option.splitNumber;
             var precision = this.option.precision;
             var splitGap = (this._max - this._min) / splitNumber;
-            
+
             this._valueList = [];
             for (var i = 0; i <= splitNumber; i++) {
                 this._valueList.push((this._min + splitGap * i).toFixed(precision) - 0);
@@ -759,7 +786,7 @@ define(function (require) {
             }
 
         },
-        
+
         getExtremum : function () {
             this._calculateValue();
             return {
@@ -795,16 +822,16 @@ define(function (require) {
             var result;
             if (!this.isHorizontal()) {
                 // 纵向
-                result = this.grid.getYend() 
-                         - (value - this._min) 
-                           / (this._max - this._min) 
+                result = this.grid.getYend()
+                         - (value - this._min)
+                           / (this._max - this._min)
                            * this.grid.getHeight();
             }
             else {
                 // 横向
-                result = this.grid.getX() 
-                         + (value - this._min) 
-                           / (this._max - this._min) 
+                result = this.grid.getX()
+                         + (value - this._min)
+                           / (this._max - this._min)
                            * this.grid.getWidth();
             }
 
@@ -816,7 +843,7 @@ define(function (require) {
                    : Math.floor(result);
             */
         },
-        
+
         // 根据值换算绝对大小
         getCoordSize : function (value) {
             if (!this.isHorizontal()) {
@@ -828,7 +855,7 @@ define(function (require) {
                 return Math.abs(value / (this._max - this._min) * this.grid.getWidth());
             }
         },
-        
+
         // 根据位置换算值
         getValueFromCoord : function(coord) {
             var result;
@@ -836,29 +863,29 @@ define(function (require) {
                 // 纵向
                 coord = coord < this.grid.getY() ? this.grid.getY() : coord;
                 coord = coord > this.grid.getYend() ? this.grid.getYend() : coord;
-                result = this._max 
-                         - (coord - this.grid.getY()) 
-                           / this.grid.getHeight() 
+                result = this._max
+                         - (coord - this.grid.getY())
+                           / this.grid.getHeight()
                            * (this._max - this._min);
             }
             else {
                 // 横向
                 coord = coord < this.grid.getX() ? this.grid.getX() : coord;
                 coord = coord > this.grid.getXend() ? this.grid.getXend() : coord;
-                result = this._min 
-                         + (coord - this.grid.getX()) 
-                           / this.grid.getWidth() 
+                result = this._min
+                         + (coord - this.grid.getX())
+                           / this.grid.getWidth()
                            * (this._max - this._min);
             }
-            
+
             return result.toFixed(2) - 0;
         }
     };
 
     zrUtil.inherits(ValueAxis, Base);
-    
+
     require('../component').define('valueAxis', ValueAxis);
-    
+
     return ValueAxis;
 });
 

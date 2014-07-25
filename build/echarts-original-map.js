@@ -10097,7 +10097,7 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
     var ecQuery = require('../util/ecQuery');
     var number = require('../util/number');
     var zrUtil = require('zrender/tool/util');
-    
+
     function Base(ecTheme, messageCenter, zr, option, myChart){
         this.ecTheme = ecTheme;
         this.messageCenter = messageCenter;
@@ -10106,11 +10106,11 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
         this.series = option.series;
         this.myChart = myChart;
         this.component = myChart.component;
-        
+
         this._zlevelBase = this.getZlevelBase();
         this.shapeList = [];
         this.effectList = [];
-        
+
         var self = this;
         self.hoverConnect = function (param) {
             var target = (param.target || {}).hoverConnect;
@@ -10183,7 +10183,7 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
                     return 6;
 
                 // ecConfig.EFFECT_ZLEVEL = 7;
-                
+
                 case ecConfig.COMPONENT_TYPE_TOOLTIP :
                     return 8;
 
@@ -10204,7 +10204,7 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
                        zrUtil.clone(this.ecTheme[this.type] || {})
                    );
         },
-        
+
         /**
          * css类属性数组补全，如padding，margin等~
          */
@@ -10236,7 +10236,7 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
             }
             return null;
         },
-        
+
         /**
          * 获取自定义和默认配置合并后的字体设置
          */
@@ -10250,13 +10250,13 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
                    + finalTextStyle.fontSize + 'px '
                    + finalTextStyle.fontFamily;
         },
-        
+
         getItemStyleColor : function (itemColor, seriesIndex, dataIndex, data) {
             return typeof itemColor == 'function'
                    ? itemColor(seriesIndex, dataIndex, data) : itemColor;
-            
-        },        
-        
+
+        },
+
         // 亚像素优化
         subPixelOptimize : function (position, lineWidth) {
             if (lineWidth % 2 == 1) {
@@ -10268,8 +10268,8 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
             }
             return position;
         },
-        
-        
+
+
         resize : function () {
             this.refresh && this.refresh();
             this.animationEffect && this.animationEffect();
@@ -10292,17 +10292,17 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
             this.shapeList = null;
             this.effectList = null;
         },
-        
+
         query : ecQuery.query,
         deepQuery : ecQuery.deepQuery,
         deepMerge : ecQuery.deepMerge,
-        
+
         parsePercent : number.parsePercent,
         parseCenter : number.parseCenter,
         parseRadius : number.parseRadius,
         numAddCommas : number.addCommas
     };
-    
+
     return Base;
 });
 
@@ -15574,9 +15574,10 @@ define('echarts/component',[],function (/*require*/) {     // component
     self.get = function (name) {
         return _componentLibrary[name];
     };
-    
+
     return self;
 });
+
 /**
  * echarts组件：提示框
  *
@@ -25276,16 +25277,16 @@ define('echarts/chart/funnel',['require','../component/base','./base','zrender/s
  */
 define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text','zrender/shape/Line','zrender/shape/Rectangle','../config','zrender/tool/util','zrender/tool/area','../component'],function (require) {
     var Base = require('./base');
-    
+
     // 图形依赖
     var TextShape = require('zrender/shape/Text');
     var LineShape = require('zrender/shape/Line');
     var RectangleShape = require('zrender/shape/Rectangle');
-    
+
     var ecConfig = require('../config');
     var zrUtil = require('zrender/tool/util');
     var zrArea = require('zrender/tool/area');
-    
+
     /**
      * 构造函数
      * @param {Object} messageCenter echart消息中心
@@ -25298,25 +25299,25 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             console.error('option.data.length < 1.');
             return;
         }
-        
+
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
-        
+
         this.grid = this.component.grid;
-        
+
         for (var method in axisBase) {
             this[method] = axisBase[method];
         }
-        
+
         this.refresh(option);
     }
-    
+
     CategoryAxis.prototype = {
         type : ecConfig.COMPONENT_TYPE_AXIS_CATEGORY,
         _getReformedLabel : function (idx) {
             var data = typeof this.option.data[idx].value != 'undefined'
                        ? this.option.data[idx].value
                        : this.option.data[idx];
-            var formatter = this.option.data[idx].formatter 
+            var formatter = this.option.data[idx].formatter
                             || this.option.axisLabel.formatter;
             if (formatter) {
                 if (typeof formatter == 'function') {
@@ -25328,7 +25329,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             }
             return data;
         },
-        
+
         /**
          * 计算标签显示挑选间隔
          */
@@ -25354,7 +25355,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                             interval += step;
                             isEnough = true;
                             labelSpace = Math.floor(gap * interval); // 标签左右至少间隔为3px
-                            for (var i = Math.floor((dataLength - 1)/ interval) * interval; 
+                            for (var i = Math.floor((dataLength - 1)/ interval) * interval;
                                  i >= 0; i -= interval
                              ) {
                                 if (this.option.axisLabel.rotate !== 0) {
@@ -25424,14 +25425,14 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
 
             return interval;
         },
-        
+
         /**
          * 绘制图形
          */
         _buildShape : function () {
             // 标签显示的挑选间隔
             this._interval = this._getInterval();
-            
+
             this.option.splitArea.show && this._buildSplitArea();
             this.option.splitLine.show && this._buildSplitLine();
             this.option.axisLine.show && this._buildAxisLine();
@@ -25452,21 +25453,21 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             var length     = tickOption.length;
             var color      = tickOption.lineStyle.color;
             var lineWidth  = tickOption.lineStyle.width;
-            var interval   = tickOption.interval == 'auto' 
+            var interval   = tickOption.interval == 'auto'
                              ? this._interval : (tickOption.interval - 0 + 1);
             var onGap      = tickOption.onGap;
-            var optGap     = onGap 
-                             ? (this.getGap() / 2) 
+            var optGap     = onGap
+                             ? (this.getGap() / 2)
                              : typeof onGap == 'undefined'
                                    ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                    : 0;
-            var startIndex = optGap > 0 ? -interval : 0;                       
+            var startIndex = optGap > 0 ? -interval : 0;
             if (this.isHorizontal()) {
                 // 横向
                 var yPosition = this.option.position == 'bottom'
-                        ? (tickOption.inside 
+                        ? (tickOption.inside
                            ? (this.grid.getYend() - length - 1) : (this.grid.getYend() + 1))
-                        : (tickOption.inside 
+                        : (tickOption.inside
                            ? (this.grid.getY() + 1) : (this.grid.getY() - length - 1));
                 var x;
                 for (var i = startIndex; i < dataLength; i += interval) {
@@ -25493,11 +25494,11 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             else {
                 // 纵向
                 var xPosition = this.option.position == 'left'
-                    ? (tickOption.inside 
+                    ? (tickOption.inside
                        ? (this.grid.getX() + 1) : (this.grid.getX() - length - 1))
-                    : (tickOption.inside 
+                    : (tickOption.inside
                        ? (this.grid.getXend() - length - 1) : (this.grid.getXend() + 1));
-                        
+
                 var y;
                 for (var i = startIndex; i < dataLength; i += interval) {
                     // 亚像素优化
@@ -25531,19 +25532,33 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             var margin     = this.option.axisLabel.margin;
             var clickable  = this.option.axisLabel.clickable;
             var textStyle  = this.option.axisLabel.textStyle;
+            var skipFirst  = this.option.axisLabel.skipFirst;
             var dataTextStyle;
 
             if (this.isHorizontal()) {
                 // 横向
+                var orient;
                 var yPosition;
                 var baseLine;
                 if (this.option.position == 'bottom') {
-                    yPosition = this.grid.getYend() + margin;
-                    baseLine = 'top';
+                    orient = this.option.orient || 'bottom';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getYend() + margin;
+                        baseLine = 'top';
+                    } else {
+                        yPosition = this.grid.getYend() - margin;
+                        baseLine = 'bottom';
+                    }
                 }
                 else {
-                    yPosition = this.grid.getY() - margin;
-                    baseLine = 'bottom';
+                    orient = this.option.orient || 'top';
+                    if (orient === 'top') {
+                        yPosition = this.grid.getY() - margin;
+                        baseLine = 'bottom';
+                    } else {
+                        yPosition = this.grid.getY() + margin;
+                        baseLine = 'top';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i += this._interval) {
@@ -25563,7 +25578,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                             x : this.getCoordByIndex(i),
                             y : yPosition,
                             color : dataTextStyle.color,
-                            text : this._getReformedLabel(i),
+                            text : (skipFirst && i === 0) ? '' : this._getReformedLabel(i),
                             textFont : this.getFont(dataTextStyle),
                             textAlign : dataTextStyle.align || 'center',
                             textBaseline : dataTextStyle.baseline || baseLine
@@ -25588,15 +25603,28 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             }
             else {
                 // 纵向
+                var orient;
                 var xPosition;
                 var align;
                 if (this.option.position == 'left') {
-                    xPosition = this.grid.getX() - margin;
-                    align = 'right';
+                    orient = this.option.orient || 'left';
+                    if (orient === 'left') {        // label放在grid外面
+                        xPosition = this.grid.getX() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid里面
+                        xPosition = this.grid.getX() + margin;
+                        align = 'left';
+                    }
                 }
                 else {
-                    xPosition = this.grid.getXend() + margin;
-                    align = 'left';
+                    orient = this.option.orient || 'right';
+                    if (orient === 'left') {        // label放在grid里面
+                        xPosition = this.grid.getXend() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid外面
+                        xPosition = this.grid.getXend() + margin;
+                        align = 'left';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i += this._interval) {
@@ -25616,19 +25644,19 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                             x : xPosition,
                             y : this.getCoordByIndex(i),
                             color : dataTextStyle.color,
-                            text : this._getReformedLabel(i),
+                            text : (skipFirst && i === 0) ? '' : this._getReformedLabel(i),
                             textFont : this.getFont(dataTextStyle),
                             textAlign : dataTextStyle.align || align,
-                            textBaseline : dataTextStyle.baseline 
+                            textBaseline : dataTextStyle.baseline
                                            || (i === 0 && this.option.name !== '')
                                                ? 'bottom'
-                                               : (i == (dataLength - 1) 
+                                               : (i == (dataLength - 1)
                                                   && this.option.name !== '')
                                                  ? 'top'
                                                  : 'middle'
                         }
                     };
-                    
+
                     if (rotate) {
                         axShape.rotation = [
                             rotate * Math.PI / 180,
@@ -25642,7 +25670,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                 }
             }
         },
-        
+
         _buildSplitLine : function () {
             var axShape;
             //var data       = this.option.data;
@@ -25653,14 +25681,14 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             var color       = sLineOption.lineStyle.color;
             color = color instanceof Array ? color : [color];
             var colorLength = color.length;
-            
+
             var onGap      = sLineOption.onGap;
-            var optGap     = onGap 
-                             ? (this.getGap() / 2) 
+            var optGap     = onGap
+                             ? (this.getGap() / 2)
                              : typeof onGap == 'undefined'
                                    ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                    : 0;
-            dataLength -= (onGap || (typeof onGap == 'undefined' && this.option.boundaryGap)) 
+            dataLength -= (onGap || (typeof onGap == 'undefined' && this.option.boundaryGap))
                           ? 1 : 0;
             if (this.isHorizontal()) {
                 // 横向
@@ -25746,10 +25774,10 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                 // 多颜色
                 var colorLength = color.length;
                 var dataLength  = this.option.data.length;
-        
+
                 var onGap      = sAreaOption.onGap;
-                var optGap     = onGap 
-                                 ? (this.getGap() / 2) 
+                var optGap     = onGap
+                                 ? (this.getGap() / 2)
                                  : typeof onGap == 'undefined'
                                        ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                        : 0;
@@ -25759,7 +25787,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                     var height = this.grid.getHeight();
                     var lastX = this.grid.getX();
                     var curX;
-    
+
                     for (var i = 0; i <= dataLength; i += this._interval) {
                         curX = i < dataLength
                                ? (this.getCoordByIndex(i) + optGap)
@@ -25787,7 +25815,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                     var width = this.grid.getWidth();
                     var lastYend = this.grid.getYend();
                     var curY;
-    
+
                     for (var i = 0; i <= dataLength; i += this._interval) {
                         curY = i < dataLength
                                ? (this.getCoordByIndex(i) - optGap)
@@ -25853,7 +25881,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
 
             for (var i = 0; i < dataLength; i++) {
                 if (data[i] == value
-                    || (typeof data[i].value != 'undefined' 
+                    || (typeof data[i].value != 'undefined'
                         && data[i].value == value)
                 ) {
                     if (this.isHorizontal()) {
@@ -25864,7 +25892,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                         // 纵向
                         position = this.grid.getYend() - position;
                     }
-                    
+
                     return position;
                     // Math.floor可能引起一些偏差，但性能会更好
                     /* 准确更重要
@@ -25899,7 +25927,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                 var gap = this.getGap();
                 var position = this.option.boundaryGap ? (gap / 2) : 0;
                 position += dataIndex * gap;
-                
+
                 if (this.isHorizontal()) {
                     // 横向
                     position = this.grid.getX() + position;
@@ -25908,7 +25936,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                     // 纵向
                     position = this.grid.getYend() - position;
                 }
-                
+
                 return position;
                 /* 准确更重要
                 return (dataIndex === 0 || dataIndex == this.option.data.length - 1)
@@ -25929,7 +25957,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
                 return data;
             }
         },
-        
+
         // 根据类目轴名称换算类目轴数据索引
         getIndexByName : function (name) {
             var data = this.option.data;
@@ -25937,16 +25965,16 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
 
             for (var i = 0; i < dataLength; i++) {
                 if (data[i] == name
-                    || (typeof data[i].value != 'undefined' 
+                    || (typeof data[i].value != 'undefined'
                         && data[i].value == name)
                 ) {
                     return i;
                 }
             }
-            
+
             return -1;
         },
-        
+
         // 根据位置换算值
         getValueFromCoord : function() {
             return '';
@@ -25961,13 +25989,14 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
             return dataIndex % this._interval === 0;
         }
     };
-    
+
     zrUtil.inherits(CategoryAxis, Base);
-    
+
     require('../component').define('categoryAxis', CategoryAxis);
-    
+
     return CategoryAxis;
 });
+
 /**
  * echarts组件： 数值轴
  *
@@ -25977,12 +26006,12 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
  */
 define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','zrender/shape/Line','zrender/shape/Rectangle','../config','zrender/tool/util','../component'],function (require) {
     var Base = require('./base');
-    
+
     // 图形依赖
     var TextShape = require('zrender/shape/Text');
     var LineShape = require('zrender/shape/Line');
     var RectangleShape = require('zrender/shape/Rectangle');
-    
+
     var ecConfig = require('../config');
     var zrUtil = require('zrender/tool/util');
 
@@ -25999,19 +26028,19 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             console.err('option.series.length == 0.');
             return;
         }
-        
+
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
 
         this.series = series;
         this.grid = this.component.grid;
-        
+
         for (var method in axisBase) {
             this[method] = axisBase[method];
         }
-        
+
         this.refresh(option, series);
     }
-    
+
     ValueAxis.prototype = {
         type : ecConfig.COMPONENT_TYPE_AXIS_VALUE,
         _buildShape : function () {
@@ -26044,9 +26073,9 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             if (this.isHorizontal()) {
                 // 横向
                 var yPosition = this.option.position == 'bottom'
-                        ? (tickOption.inside 
+                        ? (tickOption.inside
                            ? (this.grid.getYend() - length - 1) : (this.grid.getYend()) + 1)
-                        : (tickOption.inside 
+                        : (tickOption.inside
                            ? (this.grid.getY() + 1) : (this.grid.getY() - length - 1));
                 var x;
                 for (var i = 0; i < dataLength; i++) {
@@ -26071,9 +26100,9 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             else {
                 // 纵向
                 var xPosition = this.option.position == 'left'
-                    ? (tickOption.inside 
+                    ? (tickOption.inside
                        ? (this.grid.getX() + 1) : (this.grid.getX() - length - 1))
-                    : (tickOption.inside 
+                    : (tickOption.inside
                        ? (this.grid.getXend() - length - 1) : (this.grid.getXend() + 1));
 
                 var y;
@@ -26107,18 +26136,32 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             var margin     = this.option.axisLabel.margin;
             var clickable  = this.option.axisLabel.clickable;
             var textStyle  = this.option.axisLabel.textStyle;
+            var skipFirst  = this.option.axisLabel.skipFirst;
 
             if (this.isHorizontal()) {
                 // 横向
+                var orient;
                 var yPosition;
                 var baseLine;
                 if (this.option.position == 'bottom') {
-                    yPosition = this.grid.getYend() + margin;
-                    baseLine = 'top';
+                    orient = this.option.orient || 'bottom';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getYend() + margin;
+                        baseLine = 'top';
+                    } else {
+                        yPosition = this.grid.getYend() - margin;
+                        baseLine = 'bottom';
+                    }
                 }
                 else {
-                    yPosition = this.grid.getY() - margin;
-                    baseLine = 'bottom';
+                    orient = this.option.orient || 'top';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getY() - margin;
+                        baseLine = 'bottom';
+                    } else {
+                        yPosition = this.grid.getY() + margin;
+                        baseLine = 'top';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i++) {
@@ -26130,7 +26173,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                             y : yPosition,
                             color : typeof textStyle.color == 'function'
                                     ? textStyle.color(data[i]) : textStyle.color,
-                            text : this._valueLabel[i],
+                            text : (skipFirst && i === 0) ? '' : this._valueLabel[i],
                             textFont : this.getFont(textStyle),
                             textAlign : textStyle.align || 'center',
                             textBaseline : textStyle.baseline || baseLine
@@ -26155,15 +26198,28 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             }
             else {
                 // 纵向
+                var orient;
                 var xPosition;
                 var align;
                 if (this.option.position == 'left') {
-                    xPosition = this.grid.getX() - margin;
-                    align = 'right';
+                    orient = this.option.orient || 'left';
+                    if (orient === 'left') {        // label放在grid外面
+                        xPosition = this.grid.getX() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid里面
+                        xPosition = this.grid.getX() + margin;
+                        align = 'left';
+                    }
                 }
                 else {
-                    xPosition = this.grid.getXend() + margin;
-                    align = 'left';
+                    orient = this.option.orient || 'right';
+                    if (orient === 'left') {        // label放在grid里面
+                        xPosition = this.grid.getXend() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid外面
+                        xPosition = this.grid.getXend() + margin;
+                        align = 'left';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i++) {
@@ -26175,19 +26231,19 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                             y : this.getCoord(data[i]),
                             color : typeof textStyle.color == 'function'
                                     ? textStyle.color(data[i]) : textStyle.color,
-                            text : this._valueLabel[i],
+                            text : (skipFirst && i === 0) ? '' : this._valueLabel[i],
                             textFont : this.getFont(textStyle),
                             textAlign : textStyle.align || align,
-                            textBaseline : textStyle.baseline 
+                            textBaseline : textStyle.baseline
                                            || (i === 0 && this.option.name !== '')
                                                ? 'bottom'
-                                               : (i == (dataLength - 1) 
+                                               : (i == (dataLength - 1)
                                                   && this.option.name !== '')
                                                  ? 'top'
                                                  : 'middle'
                         }
                     };
-                    
+
                     if (rotate) {
                         axShape.rotation = [
                             rotate * Math.PI / 180,
@@ -26385,7 +26441,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                         // 不是自己的数据不计算极值
                         continue;
                     }
-                    
+
                     var key = this.series[i].name || 'kener';
                     if (!this.series[i].stack) {
                         data[key] = data[key] || [];
@@ -26475,12 +26531,12 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                         }
                     }
                 }
-                
+
                 //console.log(this._min,this._max,'vvvvv111111')
                 this._min = isNaN(this.option.min - 0)
                        ? (this._min - Math.abs(this._min * this.option.boundaryGap[0]))
                        : (this.option.min - 0);    // 指定min忽略boundaryGay[0]
-    
+
                 this._max = isNaN(this.option.max - 0)
                        ? (this._max + Math.abs(this._max * this.option.boundaryGap[1]))
                        : (this.option.max - 0);    // 指定max忽略boundaryGay[1]
@@ -26687,18 +26743,18 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                 this._min = (this._min / power).toFixed(precision) - 0;
                 this._max = (this._max / power).toFixed(precision) - 0;
                 for (var i = 0; i <= splitNumber; i++) {
-                    this._valueList[i] = 
+                    this._valueList[i] =
                         (this._valueList[i] / power).toFixed(precision) - 0;
                 }
             }
             this._reformLabelData();
         },
-        
+
         _customerValue : function () {
             var splitNumber = this.option.splitNumber;
             var precision = this.option.precision;
             var splitGap = (this._max - this._min) / splitNumber;
-            
+
             this._valueList = [];
             for (var i = 0; i <= splitNumber; i++) {
                 this._valueList.push((this._min + splitGap * i).toFixed(precision) - 0);
@@ -26729,7 +26785,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             }
 
         },
-        
+
         getExtremum : function () {
             this._calculateValue();
             return {
@@ -26765,16 +26821,16 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             var result;
             if (!this.isHorizontal()) {
                 // 纵向
-                result = this.grid.getYend() 
-                         - (value - this._min) 
-                           / (this._max - this._min) 
+                result = this.grid.getYend()
+                         - (value - this._min)
+                           / (this._max - this._min)
                            * this.grid.getHeight();
             }
             else {
                 // 横向
-                result = this.grid.getX() 
-                         + (value - this._min) 
-                           / (this._max - this._min) 
+                result = this.grid.getX()
+                         + (value - this._min)
+                           / (this._max - this._min)
                            * this.grid.getWidth();
             }
 
@@ -26786,7 +26842,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                    : Math.floor(result);
             */
         },
-        
+
         // 根据值换算绝对大小
         getCoordSize : function (value) {
             if (!this.isHorizontal()) {
@@ -26798,7 +26854,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                 return Math.abs(value / (this._max - this._min) * this.grid.getWidth());
             }
         },
-        
+
         // 根据位置换算值
         getValueFromCoord : function(coord) {
             var result;
@@ -26806,29 +26862,29 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
                 // 纵向
                 coord = coord < this.grid.getY() ? this.grid.getY() : coord;
                 coord = coord > this.grid.getYend() ? this.grid.getYend() : coord;
-                result = this._max 
-                         - (coord - this.grid.getY()) 
-                           / this.grid.getHeight() 
+                result = this._max
+                         - (coord - this.grid.getY())
+                           / this.grid.getHeight()
                            * (this._max - this._min);
             }
             else {
                 // 横向
                 coord = coord < this.grid.getX() ? this.grid.getX() : coord;
                 coord = coord > this.grid.getXend() ? this.grid.getXend() : coord;
-                result = this._min 
-                         + (coord - this.grid.getX()) 
-                           / this.grid.getWidth() 
+                result = this._min
+                         + (coord - this.grid.getX())
+                           / this.grid.getWidth()
                            * (this._max - this._min);
             }
-            
+
             return result.toFixed(2) - 0;
         }
     };
 
     zrUtil.inherits(ValueAxis, Base);
-    
+
     require('../component').define('valueAxis', ValueAxis);
-    
+
     return ValueAxis;
 });
 
@@ -26850,14 +26906,14 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
  */
 define('echarts/component/axis',['require','./base','zrender/shape/Line','../config','../util/ecData','zrender/tool/util','zrender/tool/color','./categoryAxis','./valueAxis','../component'],function (require) {
     var Base = require('./base');
-    
+
     var LineShape = require('zrender/shape/Line');
-    
+
     var ecConfig = require('../config');
     var ecData = require('../util/ecData');
     var zrUtil = require('zrender/tool/util');
     var zrColor = require('zrender/tool/color');
-    
+
     /**
      * 构造函数
      * @param {Object} messageCenter echart消息中心
@@ -26870,13 +26926,13 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
      */
     function Axis(ecTheme, messageCenter, zr, option, myChart, axisType) {
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
-        
+
         this.axisType = axisType;
         this._axisList = [];
-        
+
         this.refresh(option);
     }
-    
+
     Axis.prototype = {
         type : ecConfig.COMPONENT_TYPE_AXIS,
         axisBase : {
@@ -26942,28 +26998,28 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     }
                 }
                 axShape.style.strokeColor = this.option.axisLine.lineStyle.color;
-                
+
                 axShape.style.lineWidth = lineWidth;
                 // 亚像素优化
                 if (this.isHorizontal()) {
                     // 横向布局，优化y
-                    axShape.style.yStart 
-                        = axShape.style.yEnd 
+                    axShape.style.yStart
+                        = axShape.style.yEnd
                         = this.subPixelOptimize(axShape.style.yEnd, lineWidth);
                 }
                 else {
                     // 纵向布局，优化x
-                    axShape.style.xStart 
-                        = axShape.style.xEnd 
+                    axShape.style.xStart
+                        = axShape.style.xEnd
                         = this.subPixelOptimize(axShape.style.xEnd, lineWidth);
                 }
-                
+
                 axShape.style.lineType = this.option.axisLine.lineStyle.type;
-                
+
                 axShape = new LineShape(axShape);
                 this.shapeList.push(axShape);
             },
-            
+
             _axisLabelClickable : function(clickable, axShape) {
                 if (clickable) {
                     ecData.pack(
@@ -26981,7 +27037,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     return axShape;
                 }
             },
-            
+
             refixAxisShape : function(zeroX, zeroY) {
                 if (!this.option.axisLine.onZero) {
                     return;
@@ -26991,15 +27047,15 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     // 横向布局调整纵向y
                     for (var i = 0, l = this.shapeList.length; i < l; i++) {
                         if (this.shapeList[i]._axisShape == 'axisLine') {
-                            this.shapeList[i].style.yStart 
-                                = this.shapeList[i].style.yEnd 
+                            this.shapeList[i].style.yStart
+                                = this.shapeList[i].style.yEnd
                                 = this.subPixelOptimize(
                                     zeroY, this.shapeList[i].stylelineWidth
                                 );
                             this.zr.modShape(this.shapeList[i].id);
                         }
                         else if (this.shapeList[i]._axisShape == 'axisTick') {
-                            tickLength = this.shapeList[i].style.yEnd 
+                            tickLength = this.shapeList[i].style.yEnd
                                          - this.shapeList[i].style.yStart;
                             this.shapeList[i].style.yStart = zeroY - tickLength;
                             this.shapeList[i].style.yEnd = zeroY;
@@ -27011,15 +27067,15 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     // 纵向布局调整横向x
                     for (var i = 0, l = this.shapeList.length; i < l; i++) {
                         if (this.shapeList[i]._axisShape == 'axisLine') {
-                            this.shapeList[i].style.xStart 
-                                = this.shapeList[i].style.xEnd 
+                            this.shapeList[i].style.xStart
+                                = this.shapeList[i].style.xEnd
                                 = this.subPixelOptimize(
                                     zeroX, this.shapeList[i].stylelineWidth
                                 );
                             this.zr.modShape(this.shapeList[i].id);
                         }
                         else if (this.shapeList[i]._axisShape == 'axisTick') {
-                            tickLength = this.shapeList[i].style.xEnd 
+                            tickLength = this.shapeList[i].style.xEnd
                                          - this.shapeList[i].style.xStart;
                             this.shapeList[i].style.xStart = zeroX;
                             this.shapeList[i].style.xEnd = zeroX + tickLength;
@@ -27028,11 +27084,11 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     }
                 }
             },
-            
+
             getPosition : function () {
                 return this.option.position;
             },
-            
+
             isHorizontal : function() {
                 return this.option.position == 'bottom' || this.option.position == 'top';
             }
@@ -27101,7 +27157,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
 
             return opt;
         },
-        
+
         /**
          * 刷新
          */
@@ -27119,7 +27175,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                 }
                 this.series = newOption.series;
             }
-    
+
             var CategoryAxis = require('./categoryAxis');
             var ValueAxis = require('./valueAxis');
             var len = Math.max((axisOption && axisOption.length || 0), this._axisList.length);
@@ -27131,7 +27187,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                     this._axisList[i].dispose && this._axisList[i].dispose();
                     this._axisList[i] = false;
                 }
-                
+
                 if (this._axisList[i]) {
                     this._axisList[i].refresh && this._axisList[i].refresh(
                         axisOption ? axisOption[i] : false,
@@ -27149,7 +27205,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
                                                axisOption[i], this.myChart, this.axisBase,
                                                this.series
                                            );
-                    
+
                 }
             }
         },
@@ -27169,13 +27225,14 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
             this._axisList = [];
         }
     };
-    
+
     zrUtil.inherits(Axis, Base);
-    
+
     require('../component').define('axis', Axis);
-     
+
     return Axis;
 });
+
 /**
  * echarts组件： 网格
  *
