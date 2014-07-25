@@ -7,16 +7,16 @@
  */
 define(function (require) {
     var Base = require('./base');
-    
+
     // 图形依赖
     var TextShape = require('zrender/shape/Text');
     var LineShape = require('zrender/shape/Line');
     var RectangleShape = require('zrender/shape/Rectangle');
-    
+
     var ecConfig = require('../config');
     var zrUtil = require('zrender/tool/util');
     var zrArea = require('zrender/tool/area');
-    
+
     /**
      * 构造函数
      * @param {Object} messageCenter echart消息中心
@@ -29,25 +29,25 @@ define(function (require) {
             console.error('option.data.length < 1.');
             return;
         }
-        
+
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
-        
+
         this.grid = this.component.grid;
-        
+
         for (var method in axisBase) {
             this[method] = axisBase[method];
         }
-        
+
         this.refresh(option);
     }
-    
+
     CategoryAxis.prototype = {
         type : ecConfig.COMPONENT_TYPE_AXIS_CATEGORY,
         _getReformedLabel : function (idx) {
             var data = typeof this.option.data[idx].value != 'undefined'
                        ? this.option.data[idx].value
                        : this.option.data[idx];
-            var formatter = this.option.data[idx].formatter 
+            var formatter = this.option.data[idx].formatter
                             || this.option.axisLabel.formatter;
             if (formatter) {
                 if (typeof formatter == 'function') {
@@ -59,7 +59,7 @@ define(function (require) {
             }
             return data;
         },
-        
+
         /**
          * 计算标签显示挑选间隔
          */
@@ -85,7 +85,7 @@ define(function (require) {
                             interval += step;
                             isEnough = true;
                             labelSpace = Math.floor(gap * interval); // 标签左右至少间隔为3px
-                            for (var i = Math.floor((dataLength - 1)/ interval) * interval; 
+                            for (var i = Math.floor((dataLength - 1)/ interval) * interval;
                                  i >= 0; i -= interval
                              ) {
                                 if (this.option.axisLabel.rotate !== 0) {
@@ -155,14 +155,14 @@ define(function (require) {
 
             return interval;
         },
-        
+
         /**
          * 绘制图形
          */
         _buildShape : function () {
             // 标签显示的挑选间隔
             this._interval = this._getInterval();
-            
+
             this.option.splitArea.show && this._buildSplitArea();
             this.option.splitLine.show && this._buildSplitLine();
             this.option.axisLine.show && this._buildAxisLine();
@@ -183,21 +183,21 @@ define(function (require) {
             var length     = tickOption.length;
             var color      = tickOption.lineStyle.color;
             var lineWidth  = tickOption.lineStyle.width;
-            var interval   = tickOption.interval == 'auto' 
+            var interval   = tickOption.interval == 'auto'
                              ? this._interval : (tickOption.interval - 0 + 1);
             var onGap      = tickOption.onGap;
-            var optGap     = onGap 
-                             ? (this.getGap() / 2) 
+            var optGap     = onGap
+                             ? (this.getGap() / 2)
                              : typeof onGap == 'undefined'
                                    ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                    : 0;
-            var startIndex = optGap > 0 ? -interval : 0;                       
+            var startIndex = optGap > 0 ? -interval : 0;
             if (this.isHorizontal()) {
                 // 横向
                 var yPosition = this.option.position == 'bottom'
-                        ? (tickOption.inside 
+                        ? (tickOption.inside
                            ? (this.grid.getYend() - length - 1) : (this.grid.getYend() + 1))
-                        : (tickOption.inside 
+                        : (tickOption.inside
                            ? (this.grid.getY() + 1) : (this.grid.getY() - length - 1));
                 var x;
                 for (var i = startIndex; i < dataLength; i += interval) {
@@ -224,11 +224,11 @@ define(function (require) {
             else {
                 // 纵向
                 var xPosition = this.option.position == 'left'
-                    ? (tickOption.inside 
+                    ? (tickOption.inside
                        ? (this.grid.getX() + 1) : (this.grid.getX() - length - 1))
-                    : (tickOption.inside 
+                    : (tickOption.inside
                        ? (this.grid.getXend() - length - 1) : (this.grid.getXend() + 1));
-                        
+
                 var y;
                 for (var i = startIndex; i < dataLength; i += interval) {
                     // 亚像素优化
@@ -262,19 +262,33 @@ define(function (require) {
             var margin     = this.option.axisLabel.margin;
             var clickable  = this.option.axisLabel.clickable;
             var textStyle  = this.option.axisLabel.textStyle;
+            var skipFirst  = this.option.axisLabel.skipFirst;
             var dataTextStyle;
 
             if (this.isHorizontal()) {
                 // 横向
+                var orient;
                 var yPosition;
                 var baseLine;
                 if (this.option.position == 'bottom') {
-                    yPosition = this.grid.getYend() + margin;
-                    baseLine = 'top';
+                    orient = this.option.orient || 'bottom';
+                    if (orient === 'bottom') {
+                        yPosition = this.grid.getYend() + margin;
+                        baseLine = 'top';
+                    } else {
+                        yPosition = this.grid.getYend() - margin;
+                        baseLine = 'bottom';
+                    }
                 }
                 else {
-                    yPosition = this.grid.getY() - margin;
-                    baseLine = 'bottom';
+                    orient = this.option.orient || 'top';
+                    if (orient === 'top') {
+                        yPosition = this.grid.getY() - margin;
+                        baseLine = 'bottom';
+                    } else {
+                        yPosition = this.grid.getY() + margin;
+                        baseLine = 'top';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i += this._interval) {
@@ -294,7 +308,7 @@ define(function (require) {
                             x : this.getCoordByIndex(i),
                             y : yPosition,
                             color : dataTextStyle.color,
-                            text : this._getReformedLabel(i),
+                            text : (skipFirst && i === 0) ? '' : this._getReformedLabel(i),
                             textFont : this.getFont(dataTextStyle),
                             textAlign : dataTextStyle.align || 'center',
                             textBaseline : dataTextStyle.baseline || baseLine
@@ -319,15 +333,28 @@ define(function (require) {
             }
             else {
                 // 纵向
+                var orient;
                 var xPosition;
                 var align;
                 if (this.option.position == 'left') {
-                    xPosition = this.grid.getX() - margin;
-                    align = 'right';
+                    orient = this.option.orient || 'left';
+                    if (orient === 'left') {        // label放在grid外面
+                        xPosition = this.grid.getX() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid里面
+                        xPosition = this.grid.getX() + margin;
+                        align = 'left';
+                    }
                 }
                 else {
-                    xPosition = this.grid.getXend() + margin;
-                    align = 'left';
+                    orient = this.option.orient || 'right';
+                    if (orient === 'left') {        // label放在grid里面
+                        xPosition = this.grid.getXend() - margin;
+                        align = 'right';
+                    } else {                        // label放在grid外面
+                        xPosition = this.grid.getXend() + margin;
+                        align = 'left';
+                    }
                 }
 
                 for (var i = 0; i < dataLength; i += this._interval) {
@@ -347,19 +374,19 @@ define(function (require) {
                             x : xPosition,
                             y : this.getCoordByIndex(i),
                             color : dataTextStyle.color,
-                            text : this._getReformedLabel(i),
+                            text : (skipFirst && i === 0) ? '' : this._getReformedLabel(i),
                             textFont : this.getFont(dataTextStyle),
                             textAlign : dataTextStyle.align || align,
-                            textBaseline : dataTextStyle.baseline 
+                            textBaseline : dataTextStyle.baseline
                                            || (i === 0 && this.option.name !== '')
                                                ? 'bottom'
-                                               : (i == (dataLength - 1) 
+                                               : (i == (dataLength - 1)
                                                   && this.option.name !== '')
                                                  ? 'top'
                                                  : 'middle'
                         }
                     };
-                    
+
                     if (rotate) {
                         axShape.rotation = [
                             rotate * Math.PI / 180,
@@ -373,7 +400,7 @@ define(function (require) {
                 }
             }
         },
-        
+
         _buildSplitLine : function () {
             var axShape;
             //var data       = this.option.data;
@@ -384,14 +411,14 @@ define(function (require) {
             var color       = sLineOption.lineStyle.color;
             color = color instanceof Array ? color : [color];
             var colorLength = color.length;
-            
+
             var onGap      = sLineOption.onGap;
-            var optGap     = onGap 
-                             ? (this.getGap() / 2) 
+            var optGap     = onGap
+                             ? (this.getGap() / 2)
                              : typeof onGap == 'undefined'
                                    ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                    : 0;
-            dataLength -= (onGap || (typeof onGap == 'undefined' && this.option.boundaryGap)) 
+            dataLength -= (onGap || (typeof onGap == 'undefined' && this.option.boundaryGap))
                           ? 1 : 0;
             if (this.isHorizontal()) {
                 // 横向
@@ -477,10 +504,10 @@ define(function (require) {
                 // 多颜色
                 var colorLength = color.length;
                 var dataLength  = this.option.data.length;
-        
+
                 var onGap      = sAreaOption.onGap;
-                var optGap     = onGap 
-                                 ? (this.getGap() / 2) 
+                var optGap     = onGap
+                                 ? (this.getGap() / 2)
                                  : typeof onGap == 'undefined'
                                        ? (this.option.boundaryGap ? (this.getGap() / 2) : 0)
                                        : 0;
@@ -490,7 +517,7 @@ define(function (require) {
                     var height = this.grid.getHeight();
                     var lastX = this.grid.getX();
                     var curX;
-    
+
                     for (var i = 0; i <= dataLength; i += this._interval) {
                         curX = i < dataLength
                                ? (this.getCoordByIndex(i) + optGap)
@@ -518,7 +545,7 @@ define(function (require) {
                     var width = this.grid.getWidth();
                     var lastYend = this.grid.getYend();
                     var curY;
-    
+
                     for (var i = 0; i <= dataLength; i += this._interval) {
                         curY = i < dataLength
                                ? (this.getCoordByIndex(i) - optGap)
@@ -584,7 +611,7 @@ define(function (require) {
 
             for (var i = 0; i < dataLength; i++) {
                 if (data[i] == value
-                    || (typeof data[i].value != 'undefined' 
+                    || (typeof data[i].value != 'undefined'
                         && data[i].value == value)
                 ) {
                     if (this.isHorizontal()) {
@@ -595,7 +622,7 @@ define(function (require) {
                         // 纵向
                         position = this.grid.getYend() - position;
                     }
-                    
+
                     return position;
                     // Math.floor可能引起一些偏差，但性能会更好
                     /* 准确更重要
@@ -630,7 +657,7 @@ define(function (require) {
                 var gap = this.getGap();
                 var position = this.option.boundaryGap ? (gap / 2) : 0;
                 position += dataIndex * gap;
-                
+
                 if (this.isHorizontal()) {
                     // 横向
                     position = this.grid.getX() + position;
@@ -639,7 +666,7 @@ define(function (require) {
                     // 纵向
                     position = this.grid.getYend() - position;
                 }
-                
+
                 return position;
                 /* 准确更重要
                 return (dataIndex === 0 || dataIndex == this.option.data.length - 1)
@@ -660,7 +687,7 @@ define(function (require) {
                 return data;
             }
         },
-        
+
         // 根据类目轴名称换算类目轴数据索引
         getIndexByName : function (name) {
             var data = this.option.data;
@@ -668,16 +695,16 @@ define(function (require) {
 
             for (var i = 0; i < dataLength; i++) {
                 if (data[i] == name
-                    || (typeof data[i].value != 'undefined' 
+                    || (typeof data[i].value != 'undefined'
                         && data[i].value == name)
                 ) {
                     return i;
                 }
             }
-            
+
             return -1;
         },
-        
+
         // 根据位置换算值
         getValueFromCoord : function() {
             return '';
@@ -692,10 +719,10 @@ define(function (require) {
             return dataIndex % this._interval === 0;
         }
     };
-    
+
     zrUtil.inherits(CategoryAxis, Base);
-    
+
     require('../component').define('categoryAxis', CategoryAxis);
-    
+
     return CategoryAxis;
 });

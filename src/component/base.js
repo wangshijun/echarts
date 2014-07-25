@@ -10,7 +10,7 @@ define(function (require) {
     var ecQuery = require('../util/ecQuery');
     var number = require('../util/number');
     var zrUtil = require('zrender/tool/util');
-    
+
     function Base(ecTheme, messageCenter, zr, option, myChart){
         this.ecTheme = ecTheme;
         this.messageCenter = messageCenter;
@@ -19,11 +19,11 @@ define(function (require) {
         this.series = option.series;
         this.myChart = myChart;
         this.component = myChart.component;
-        
+
         this._zlevelBase = this.getZlevelBase();
         this.shapeList = [];
         this.effectList = [];
-        
+
         var self = this;
         self.hoverConnect = function (param) {
             var target = (param.target || {}).hoverConnect;
@@ -96,7 +96,7 @@ define(function (require) {
                     return 6;
 
                 // ecConfig.EFFECT_ZLEVEL = 7;
-                
+
                 case ecConfig.COMPONENT_TYPE_TOOLTIP :
                     return 8;
 
@@ -117,7 +117,7 @@ define(function (require) {
                        zrUtil.clone(this.ecTheme[this.type] || {})
                    );
         },
-        
+
         /**
          * css类属性数组补全，如padding，margin等~
          */
@@ -149,7 +149,7 @@ define(function (require) {
             }
             return null;
         },
-        
+
         /**
          * 获取自定义和默认配置合并后的字体设置
          */
@@ -163,13 +163,13 @@ define(function (require) {
                    + finalTextStyle.fontSize + 'px '
                    + finalTextStyle.fontFamily;
         },
-        
+
         getItemStyleColor : function (itemColor, seriesIndex, dataIndex, data) {
             return typeof itemColor == 'function'
                    ? itemColor(seriesIndex, dataIndex, data) : itemColor;
-            
-        },        
-        
+
+        },
+
         // 亚像素优化
         subPixelOptimize : function (position, lineWidth) {
             if (lineWidth % 2 == 1) {
@@ -181,8 +181,8 @@ define(function (require) {
             }
             return position;
         },
-        
-        
+
+
         resize : function () {
             this.refresh && this.refresh();
             this.animationEffect && this.animationEffect();
@@ -205,16 +205,16 @@ define(function (require) {
             this.shapeList = null;
             this.effectList = null;
         },
-        
+
         query : ecQuery.query,
         deepQuery : ecQuery.deepQuery,
         deepMerge : ecQuery.deepMerge,
-        
+
         parsePercent : number.parsePercent,
         parseCenter : number.parseCenter,
         parseRadius : number.parseRadius,
         numAddCommas : number.addCommas
     };
-    
+
     return Base;
 });
